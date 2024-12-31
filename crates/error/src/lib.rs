@@ -90,6 +90,50 @@ pub enum Status {
     DataLoss(StatusDetails),
 }
 
+#[cfg(feature = "tonic")]
+impl From<Status> for tonic::Status {
+    fn from(value: Status) -> Self {
+        match value {
+            Status::Cancelled(status_details) => tonic::Status::cancelled(status_details.message),
+            Status::Unknown(status_details) => tonic::Status::unknown(status_details.message),
+            Status::InvalidArgument(status_details) => {
+                tonic::Status::invalid_argument(status_details.message)
+            }
+            Status::DeadlineExceeded(status_details) => {
+                tonic::Status::deadline_exceeded(status_details.message)
+            }
+            Status::NotFound(status_details) => tonic::Status::not_found(status_details.message),
+            Status::AlreadyExists(status_details) => {
+                tonic::Status::already_exists(status_details.message)
+            }
+            Status::PermissionDenied(status_details) => {
+                tonic::Status::permission_denied(status_details.message)
+            }
+            Status::Unauthenticated(status_details) => {
+                tonic::Status::unauthenticated(status_details.message)
+            }
+            Status::ResourceExhaused(status_details) => {
+                tonic::Status::resource_exhausted(status_details.message)
+            }
+            Status::FailedPrecondition(status_details) => {
+                tonic::Status::failed_precondition(status_details.message)
+            }
+            Status::Aborted(status_details) => tonic::Status::aborted(status_details.message),
+            Status::OutOfRange(status_details) => {
+                tonic::Status::out_of_range(status_details.message)
+            }
+            Status::Unimplemented(status_details) => {
+                tonic::Status::unimplemented(status_details.message)
+            }
+            Status::Internal(status_details) => tonic::Status::internal(status_details.message),
+            Status::Unavailable(status_details) => {
+                tonic::Status::unavailable(status_details.message)
+            }
+            Status::DataLoss(status_details) => tonic::Status::data_loss(status_details.message),
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 #[cfg_attr(feature = "derive-new", derive(derive_new::new))]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
