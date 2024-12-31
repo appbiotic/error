@@ -148,6 +148,18 @@ pub struct StatusDetails {
     pub error_details: Vec<ErrorDetails>,
 }
 
+impl StatusDetails {
+    pub fn from_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self {
+            message: error.to_string(),
+            error_details: Vec::default(),
+        }
+    }
+}
+
 impl fmt::Display for StatusDetails {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)
@@ -230,5 +242,12 @@ mod test {
             "message": "did not match regex"
         });
         assert_eq!(value, expected);
+    }
+
+    #[test]
+    fn status_details_from_error() {
+        let error = "bug";
+        let status = Status::new_internal(StatusDetails::from_error(error));
+        assert_eq!(status.to_string(), "INTERNAL: bug");
     }
 }
