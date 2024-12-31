@@ -39,89 +39,166 @@ pub struct ErrorInfo {
 #[strum(serialize_all = "SCREAMING_SNAKE_CASE")]
 pub enum Status {
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    Cancelled(StatusDetails),
-
-    #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    Unknown(StatusDetails),
-
-    #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    InvalidArgument(StatusDetails),
-
-    #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    DeadlineExceeded(StatusDetails),
-
-    #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    NotFound(StatusDetails),
+    Aborted(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
     AlreadyExists(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    PermissionDenied(StatusDetails),
+    Cancelled(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    Unauthenticated(StatusDetails),
+    DataLoss(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    ResourceExhaused(StatusDetails),
+    DeadlineExceeded(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
     FailedPrecondition(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    Aborted(StatusDetails),
+    Internal(StatusDetails),
+
+    #[error("{}: {}", Into::<&'static str>::into(self), .0)]
+    InvalidArgument(StatusDetails),
+
+    #[error("{}: {}", Into::<&'static str>::into(self), .0)]
+    NotFound(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
     OutOfRange(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    Unimplemented(StatusDetails),
+    PermissionDenied(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    Internal(StatusDetails),
+    ResourceExhausted(StatusDetails),
+
+    #[error("{}: {}", Into::<&'static str>::into(self), .0)]
+    Unauthenticated(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
     Unavailable(StatusDetails),
 
     #[error("{}: {}", Into::<&'static str>::into(self), .0)]
-    DataLoss(StatusDetails),
+    Unimplemented(StatusDetails),
+
+    #[error("{}: {}", Into::<&'static str>::into(self), .0)]
+    Unknown(StatusDetails),
 }
 
 impl Status {
-    fn new_from_error<F, T>(cstr: F, error: T) -> Self
+    fn new_error<F, T>(cstr: F, error: T) -> Self
     where
         F: FnOnce(StatusDetails) -> Self,
         T: fmt::Display,
     {
-        cstr(StatusDetails::new_from_error(error))
+        cstr(StatusDetails::new_error(error))
     }
 
-    pub fn new_failed_precondition_from_error<T>(error: T) -> Self
+    pub fn new_aborted_error<T>(error: T) -> Self
     where
         T: fmt::Display,
     {
-        Self::new_from_error(Self::new_failed_precondition, error)
+        Self::new_error(Self::new_aborted, error)
     }
 
-    pub fn new_invalid_argument_from_error<T>(error: T) -> Self
+    pub fn new_already_exists_error<T>(error: T) -> Self
     where
         T: fmt::Display,
     {
-        Self::new_from_error(Self::new_invalid_argument, error)
+        Self::new_error(Self::new_already_exists, error)
     }
 
-    pub fn new_internal_from_error<T>(error: T) -> Self
+    pub fn new_cancelled_error<T>(error: T) -> Self
     where
         T: fmt::Display,
     {
-        Self::new_from_error(Self::new_internal, error)
+        Self::new_error(Self::new_cancelled, error)
     }
 
-    pub fn new_unknown_from_error<T>(error: T) -> Self
+    pub fn new_data_loss_error<T>(error: T) -> Self
     where
         T: fmt::Display,
     {
-        Self::new_from_error(Self::new_unknown, error)
+        Self::new_error(Self::new_data_loss, error)
+    }
+
+    pub fn new_deadline_exceeded_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_deadline_exceeded, error)
+    }
+
+    pub fn new_failed_precondition_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_failed_precondition, error)
+    }
+
+    pub fn new_internal_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_internal, error)
+    }
+
+    pub fn new_invalid_argument_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_invalid_argument, error)
+    }
+
+    pub fn new_not_found_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_not_found, error)
+    }
+
+    pub fn new_out_of_range_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_out_of_range, error)
+    }
+
+    pub fn new_permission_denied_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_permission_denied, error)
+    }
+
+    pub fn new_resource_exhausted_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_resource_exhausted, error)
+    }
+
+    pub fn new_unauthenticated_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_unauthenticated, error)
+    }
+
+    pub fn new_unimplemented_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_unimplemented, error)
+    }
+
+    pub fn new_unknown_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_error(Self::new_unknown, error)
     }
 }
 
@@ -147,7 +224,7 @@ impl From<Status> for tonic::Status {
             Status::Unauthenticated(status_details) => {
                 tonic::Status::unauthenticated(status_details.message)
             }
-            Status::ResourceExhaused(status_details) => {
+            Status::ResourceExhausted(status_details) => {
                 tonic::Status::resource_exhausted(status_details.message)
             }
             Status::FailedPrecondition(status_details) => {
@@ -183,7 +260,7 @@ pub struct StatusDetails {
 }
 
 impl StatusDetails {
-    pub fn new_from_error<T>(error: T) -> Self
+    pub fn new_error<T>(error: T) -> Self
     where
         T: fmt::Display,
     {
@@ -278,9 +355,9 @@ mod test {
     }
 
     #[test]
-    fn status_from_error() {
+    fn status_error() {
         let error = "bug";
-        let status = Status::new_internal_from_error(error);
+        let status = Status::new_internal_error(error);
         assert_eq!(status.to_string(), "INTERNAL: bug");
     }
 }
