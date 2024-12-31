@@ -3,6 +3,7 @@
     "[markdown]": {
         "editor.rulers": [
             100
-        ]
+        ],
+        "files.insertFinalNewline": true
     }
 }
