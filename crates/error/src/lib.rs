@@ -2,29 +2,27 @@ use std::{collections::BTreeMap, fmt};
 
 // TODO: Add short summarizing docs referring to primary source
 
-#[cfg_attr(feature = "derive-new", derive(derive_new::new))]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
     serde(tag = "type", rename_all = "SCREAMING_SNAKE_CASE")
 )]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, derive_new::new)]
 pub enum ErrorDetails {
     ErrorInfo(ErrorInfo),
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-#[cfg_attr(feature = "derive-new", derive(derive_new::new))]
+#[derive(Clone, Debug, derive_new::new, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct ErrorInfo {
     // TODO: Add validation for [ErrorInfo::reason]
-    #[cfg_attr(feature = "derive-new", new(into))]
+    #[new(into)]
     pub reason: String,
     // TODO: Add validation for [ErrorInfo::domain]
-    #[cfg_attr(feature = "derive-new", new(into))]
+    #[new(into)]
     pub domain: String,
     // TODO: Add validation for [ErrorInfo::metadata] keys
-    #[cfg_attr(feature = "derive-new", new(default))]
+    #[new(default)]
     #[cfg_attr(
         feature = "serde",
         serde(default, skip_serializing_if = "BTreeMap::is_empty")
@@ -32,8 +30,7 @@ pub struct ErrorInfo {
     pub metadata: BTreeMap<String, String>,
 }
 
-#[derive(Clone, Debug, strum::IntoStaticStr, thiserror::Error)]
-#[cfg_attr(feature = "derive-new", derive(derive_new::new))]
+#[derive(Clone, Debug, derive_new::new, strum::IntoStaticStr, thiserror::Error)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
@@ -90,6 +87,44 @@ pub enum Status {
     DataLoss(StatusDetails),
 }
 
+impl Status {
+    fn new_from_error<F, T>(cstr: F, error: T) -> Self
+    where
+        F: FnOnce(StatusDetails) -> Self,
+        T: fmt::Display,
+    {
+        cstr(StatusDetails::new_from_error(error))
+    }
+
+    pub fn new_failed_precondition_from_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_from_error(Self::new_failed_precondition, error)
+    }
+
+    pub fn new_invalid_argument_from_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_from_error(Self::new_invalid_argument, error)
+    }
+
+    pub fn new_internal_from_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_from_error(Self::new_internal, error)
+    }
+
+    pub fn new_unknown_from_error<T>(error: T) -> Self
+    where
+        T: fmt::Display,
+    {
+        Self::new_from_error(Self::new_unknown, error)
+    }
+}
+
 #[cfg(feature = "tonic")]
 impl From<Status> for tonic::Status {
     fn from(value: Status) -> Self {
@@ -134,13 +169,12 @@ impl From<Status> for tonic::Status {
     }
 }
 
-#[derive(Clone, Debug)]
-#[cfg_attr(feature = "derive-new", derive(derive_new::new))]
+#[derive(Clone, Debug, derive_new::new)]
 #[cfg_attr(feature = "serde", derive(serde::Deserialize, serde::Serialize))]
 pub struct StatusDetails {
-    #[cfg_attr(feature = "derive-new", new(into))]
+    #[new(into)]
     pub message: String,
-    #[cfg_attr(feature = "derive-new", new(into_iter = "ErrorDetails"))]
+    #[new(into_iter = "ErrorDetails")]
     #[cfg_attr(
         feature = "serde",
         serde(default, skip_serializing_if = "Vec::is_empty")
@@ -149,7 +183,7 @@ pub struct StatusDetails {
 }
 
 impl StatusDetails {
-    pub fn from_error<T>(error: T) -> Self
+    pub fn new_from_error<T>(error: T) -> Self
     where
         T: fmt::Display,
     {
@@ -168,8 +202,7 @@ impl fmt::Display for StatusDetails {
 
 pub type StatusResult<T> = Result<T, Status>;
 
-#[derive(Debug, thiserror::Error, strum::IntoStaticStr)]
-#[cfg_attr(feature = "derive-new", derive(derive_new::new))]
+#[derive(Debug, derive_new::new, thiserror::Error, strum::IntoStaticStr)]
 #[cfg_attr(
     feature = "serde",
     derive(serde::Deserialize, serde::Serialize),
@@ -179,7 +212,7 @@ pub type StatusResult<T> = Result<T, Status>;
 pub enum ValidationError {
     #[error("{}: {message}", Into::<&'static str>::into(self))]
     InvalidFormat {
-        #[cfg_attr(feature = "derive-new", new(into))]
+        #[new(into)]
         message: String,
     },
 }
@@ -245,9 +278,9 @@ mod test {
     }
 
     #[test]
-    fn status_details_from_error() {
+    fn status_from_error() {
         let error = "bug";
-        let status = Status::new_internal(StatusDetails::from_error(error));
+        let status = Status::new_internal_from_error(error);
         assert_eq!(status.to_string(), "INTERNAL: bug");
     }
 }
